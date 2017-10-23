@@ -251,9 +251,8 @@
             </div>
         </div>
         <Row type="flex" justify="center" align="middle" style="margin-top: 20px;">
-            <Button type="info" style="margin-right: 20px;" @click="save">保存</Button>
-            <Button type="success" style="margin-right: 20px;" @click="sync">保存并同步</Button>
-            <Button type="warning">清空菜单</Button>
+            <Button type="success" style="margin-right: 20px;" @click="save">保存</Button>
+            <Button type="warning" @click="deleteMenu">清空菜单</Button>
         </Row>
 
     </div>
@@ -266,20 +265,6 @@
             return {
                 platform: 0,
                 publicName: '黄山行之教育',
-                /** 原数组 作为参考用
-                 menu: {
-                    "button": [
-                        {"type": "click", "name": "优生活", "key": "V1001_TODAY_SINGER", "url": "", "sub_button": []},
-                        {
-                            "name": "社区", "sub_button": [
-                            {"type": "view", "name": "搜索", "key": "", "url": "http://www.soso.com/", "sub_button": []},
-                            {"type": "view", "name": "视频", "key": "", "url": "http://v.qq.com/", "sub_button": []},
-                            {"type": "click", "name": "赞一下我们", "key": "V1001_GOOD", "url": "", "sub_button": []}
-                        ]
-                        }
-                    ]
-                },
-                 **/
                 menu: {button: []},
                 activeMenuName: '',
                 activeMenuIndex: '',
@@ -296,12 +281,19 @@
         methods: {
             //服务器拉取数据
             getData() {
-                //todo 参数临时写死
-                this.request("MerchantWxMenu", {mch_id: this.$store.state.Merchant.merchant.id, platform_id: this.$store.state.Merchant.platform.id}, true).then((res) => {
-                    if (res.status) {
-                        this.menu.button = res.data;
+                this.$formHttp.get('/api/admin/wechat/menu/get').then((response) => {
+                    console.log("/api/admin/wechat/menu/get: ", response)
+                    if (response.status != 200) {
+                      this.$Message.error("失败：%d %s", response.status, response.statusText)
+                      console.error("失败：%d %s", response.status, response.statusText)
+                      return
                     }
-                })
+                    console.log("data: ", response.data)
+                    this.menu = response.data
+                }).catch((error) => {
+                    this.$Message.error(error)
+                    console.log(error)
+                })          
             },
             //变量状态检测判断
             isSet(variable) {
@@ -521,21 +513,60 @@
             },
             //保存菜单数据
             save() {
-                this.request('MerchantWxMenuSave', this.menu, true).then((res) => {
-                    if (res.status) {
-                        this.getData();
-                    }
-                }).catch((error) => {
-                })
+                var url = ''
+                var data = {}
+                if (this.menu.button.length === 0) {
+                    url = '/api/admin/wechat/menu/delete'
+                    data = {}
+                    this.$jsonHttp.post(url, data).then((response) => {
+                        console.log(url, response)
+                        if (response.status != 200) {
+                          this.$Message.error("失败：%d %s", response.status, response.statusText)
+                          console.error("失败：%d %s", response.status, response.statusText)
+                          return
+                        }
+                        console.log("保存菜单成功")
+                    }).catch((error) => {
+                        this.$Message.error(error)
+                        console.log(error)                    
+                    })                          
+                } else {
+                    url = '/api/admin/wechat/menu/update'
+                    data = this.menu
+                    this.$jsonHttp.post(url, data).then((response) => {
+                        console.log(url, response)
+                        if (response.status != 200) {
+                          this.$Message.error("失败：%d %s", response.status, response.statusText)
+                          console.error("失败：%d %s", response.status, response.statusText)
+                          return
+                        }
+                        console.log(response.data)
+                        if (response.data.errcode !== 0) {
+                            this.$Message.error("失败：", response.data.errcode)
+                            return
+                        }
+                        console.log("保存菜单成功")
+                    }).catch((error) => {
+                        this.$Message.error(error)
+                        console.log(error)                    
+                    })                     
+                }
+                     
             },
-            //保存并同步数据
-            sync() {
-                this.request('MerchantWxMenuSave', this.menu, true).then((res) => {
-                    if (res.status) {
-                        this.getData();
+            deleteMenu() {
+                var url = '/api/admin/wechat/menu/delete'
+                this.$jsonHttp.post(url, {}).then((response) => {
+                    console.log(url, response)
+                    if (response.status != 200) {
+                      this.$Message.error("失败：%d %s", response.status, response.statusText)
+                      console.error("失败：%d %s", response.status, response.statusText)
+                      return
                     }
+                    console.log("清空菜单成功")
                 }).catch((error) => {
-                })
+                    this.$Message.error(error)
+                    console.log(error)                    
+                })                     
             },
             //键盘事件 检测是是否有多输入菜单文字
             inputName(e) {
@@ -552,9 +583,8 @@
             },
         },   
         mounted() {
-            this.platform = window.localStorage.getItem('platformNumber');
             //服务器上拖取菜单数据
-            //this.getData();
+            this.getData()
         },
     }
 </script>
