@@ -72,48 +72,25 @@
                             <a href="javascript:void(0);" @click="menuItemDel" v-if="showDelBtnType===2">删除子菜单</a>
                         </div>
                     </div>
-                    <!--<div class="menu-form-box">-->
-                    <!--<div style="display: block;" class="msg-sender-tips">已为“菜单名称”添加了5个子菜单，无法设置其他内容。</div>-->
-                    <!--</div>-->
-                    <div class="form-group">
-                        <div class="form-item">
-                            <label class="form-item-label" style="width: 80px;">菜单名称</label>
-                            <div class="ivu-form-item-content" style="margin-left: 80px;">
-                                <div class="ivu-input-wrapper ivu-input-type">
-                                    <i class="ivu-icon ivu-icon-load-c ivu-load-loop ivu-input-icon ivu-input-icon-validate"></i>
-                                    <input type="text" placeholder="请填写菜单名称" class="ivu-input" style="width: 250px"
-                                           maxlength="maxLength"
-                                           v-if="activeMenuType() == 1 && isSet(menu.button[activeMenuIndex])"
-                                           v-model="menu.button[activeMenuIndex].name" @keyup="inputName($event)">
-                                    <input type="text" placeholder="请填写菜单名称" class="ivu-input" style="width: 250px"
-                                           maxlength="maxLength"
-                                           v-if="activeMenuType() == 2 && isSet(menu.button[activeMenuIndex].sub_button[activeMenuItemIndex])"
-                                           v-model="menu.button[activeMenuIndex].sub_button[activeMenuItemIndex].name"
-                                           @keyup="inputName($event)">
-                                    <p>{{stringNumberTips}}</p>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="form-item"
-                             v-show="((activeMenuIndex > 0 || activeMenuIndex === 0) && (menu.button[activeMenuIndex].sub_button.length == 0)) || (activeMenuItemIndex > 0 || activeMenuItemIndex === 0) ">
-                            <label class="form-item-label" style="width: 80px;">菜单内容</label>
-                            <div class="ivu-form-item-content" style="margin-left: 80px;">
-                                <div class="ivu-radio-group">
-                                    <Radio-group v-model="showMenuContentType" @on-change="radioLabelSelected">
-                                        <Radio label="1">发送消息</Radio>
-                                        <Radio label="2">跳转网页</Radio>
-                                        <Radio label="3">跳转小程序</Radio>
-                                        <Radio label="4">自定义</Radio>
-                                    </Radio-group>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <Form :label-width="60">
+                        <FormItem label="菜单名称">
+                            <Input v-model="menuName" placeholder="请出入菜单名称" :maxlength="20" style="width: 250px;"></Input>
+                        </FormItem>
+                        <FormItem label="菜单内容"
+                            v-show="((activeMenuIndex > 0 || activeMenuIndex === 0) && (menu.button[activeMenuIndex].sub_button.length == 0)) || (activeMenuItemIndex > 0 || activeMenuItemIndex === 0) ">
+                            <RadioGroup v-model="menuContentType">
+                                <Radio label="click">发送消息</Radio>
+                                <Radio label="view">跳转网页</Radio>
+                                <Radio label="custom">自定义事件</Radio>                                
+                                <Radio label="miniapp">跳转小程序</Radio>
+                            </RadioGroup>
+                        </FormItem>                                       
+                    </Form>
 
                     <div class="msg-content-container">
                         <!--发送消息-->
-                        <div class="msg-content" v-show="showMenuContentType==1">
+                        <div class="msg-content" v-show="menuContentType=='click'">
                             <div class="content">
                                 <div class="nav-box" style="height: 40px; border-bottom: 1px solid #e7e7eb">
                                     <div style="width: 420px;">
@@ -208,42 +185,34 @@
                             </div>
                         </div>
                         <!--跳转网页-->
-                        <div class="msg-content" v-show="showMenuContentType==2">
-                            <div class="form-item" style="padding: 15px;">
-                                <label class="form-item-label" style="width: 80px;">页面地址</label>
-                                <div class="ivu-form-item-content" style="margin-left: 80px;">
-                                    <div class="ivu-input-wrapper ivu-input-type">
-                                        <i class="ivu-icon ivu-icon-load-c ivu-load-loop ivu-input-icon ivu-input-icon-validate"></i>
-                                        <input type="text" placeholder="请填写链接地址" class="ivu-input"
-                                               v-if="activeMenuType() == 1" v-model="menu.button[activeMenuIndex].url">
-                                        <input type="text" placeholder="请填写链接地址" class="ivu-input"
-                                               v-if="activeMenuType() == 2"
-                                               v-model="menu.button[activeMenuIndex].sub_button[activeMenuItemIndex].url">
-                                        <p>从公众号图文消息中选择</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!--跳转小程序 其它-->
-                        <div class="msg-content bind-app" v-show="showMenuContentType==3">
-                            <p class="desc">自定义菜单可跳转已绑定的小程序，本公众号尚未绑定小程序。</p>
-                            <a href="https://mp.weixin.qq.com/cgi-bin/wxopen?action=list&amp;token=515462925&amp;lang=zh_CN"
-                               class="btn btn_default">前往绑定</a>
+                        <div class="msg-content" v-show="menuContentType=='view'">
+                            <Form :label-width="60" style="padding: 15px;">
+                                <FormItem label="页面地址">
+                                    <Input v-if="activeMenuType() !== 0" v-model="menuURL" placeholder="请填写链接地址"></Input>
+                                </FormItem>
+                            </Form>
                         </div>
                         <!--自定义事件-->
-                        <div class="msg-content bind-app" v-show="showMenuContentType==4">
-                            <Radio-group v-model="customizeEvent" @on-change="radioLabelSelected">
+                        <div class="msg-content bind-app" v-show="menuContentType=='custom'">
+                            <RadioGroup v-model="customizeEvent" @on-change="radioLabelSelected">
                                 <Radio label="1">扫码推事件</Radio>
                                 <Radio label="2">扫码带提示</Radio>
                                 <Radio label="3">系统拍照发图</Radio>
                                 <Radio label="4">拍照或者相册发图</Radio>
                                 <Radio label="4">微信相册发图器</Radio>
                                 <Radio label="4">地理位置选择器</Radio>
-                            </Radio-group>
+                            </RadioGroup>
+                        </div>                        
+                        <!--跳转小程序-->
+                        <div class="msg-content bind-app" v-show="menuContentType=='miniapp'">
+                            <p class="desc">自定义菜单可跳转已绑定的小程序，本公众号尚未绑定小程序。</p>
+                            <a href="https://mp.weixin.qq.com/cgi-bin/wxopen?action=list&amp;token=515462925&amp;lang=zh_CN"
+                               class="btn btn_default">前往绑定</a>
                         </div>
                     </div>
                 </div>
 
+                <!-- 没有选中时候的提示 -->
                 <div class="editor-inner-notice" v-show="menu.button.length == 0 || activeMenuIndex===''">
                     请点击左侧菜单进行编辑操作
                 </div>
@@ -271,10 +240,10 @@
                 activeMenuItemName: '',
                 activeMenuItemIndex: '',
                 showDelBtnType: '', //1:delMenu 2:delMenuItem
-                showMenuContentType: 1, //1:发送消息 2:跳转链接 3:小程序
+                showMenuContentType: 'click',
                 showMenuContentMsgType: 1, //1:图文信息 2:图片 3:语音 4:视频
                 stringNumberTips: '字数不超过4个汉字或8个字母',
-                customizeEvent: '' //自定义事件
+                customizeEvent: '', //自定义事件
             }
         },
         components: {},
@@ -288,7 +257,7 @@
                       console.error("失败：%d %s", response.status, response.statusText)
                       return
                     }
-                    console.log("data: ", response.data)
+                    console.log("get menu: ", response.data)
                     this.menu = response.data
                 }).catch((error) => {
                     this.$Message.error(error)
@@ -306,17 +275,30 @@
             //添加一级菜单
             menuAdd() {
                 if (this.menu.button.length < 3) {
-                    this.showMenuContentType = 1;
-                    this.activeMenuItemIndex = '';
-                    this.activeMenuItemName = '';
-                    this.menu.button.push({"type": "click", "name": "菜单名称", "key": "", "url": "", "sub_button": []});
+                    //显示“删除菜单”
+                    this.showDelBtnType = 1;   
+
+                    var defaultMenu = {
+                        "type": "click", 
+                        "name": "菜单名称", 
+                        "key": "", 
+                        "url": "", 
+                        "sub_button": []
+                    }
+                    this.menu.button.push(defaultMenu);
                     this.activeMenuIndex = this.menu.button.length - 1;
-                    this.activeMenuName = '菜单名称';
-                    this.showDelBtnType = 1;
+                    this.activeMenuName = this.menu.button[this.activeMenuIndex].name;
+ 
+                    this.activeMenuItemIndex = '';
+                    this.activeMenuItemName = '';             
+
                     //补全数据,无数据也要为空
                     this.menuDataCompleting();
-                    //判断是否有下级子菜单
-                    console.log(this.menu.button, this.activeMenuIndex);
+
+                    //菜单内容radio默认选中“第1项”
+                    this.showMenuContentType = 'click';
+
+                    console.log(this.menu.button);
                 } else {
                     alert('最多3个一级菜单');
                 }
@@ -427,7 +409,6 @@
                     this.menu.button[this.activeMenuIndex].type = type;
                 } else if (this.activeMenuType() == 2) {
                     this.menu.button[this.activeMenuIndex].sub_button[this.activeMenuItemIndex].type = type;
-                } else if (this.activeMenuType() == 3) {
                 }
             },
             //数据补全方法
@@ -485,24 +466,10 @@
             activeMenuBtnType() {
                 if (this.activeMenuType() === 1) {
                     //一级菜单
-                    switch (this.menu.button[this.activeMenuIndex].type) {
-                        case 'click':
-                            return 1;
-                        case 'view':
-                            return 2;
-                        default:
-                            return 0;
-                    }
+                    return this.menu.button[this.activeMenuIndex].type
                 } else if (this.activeMenuType() === 2) {
                     //子菜单、二级菜单
-                    switch (this.menu.button[this.activeMenuIndex].sub_button[this.activeMenuItemIndex].type) {
-                        case 'click':
-                            return 1;
-                        case 'view':
-                            return 2;
-                        default:
-                            return 0;
-                    }
+                    return this.menu.button[this.activeMenuIndex].sub_button[this.activeMenuItemIndex].type
                 } else {
                     return ''
                 }
@@ -533,6 +500,7 @@
                 } else {
                     url = '/api/admin/wechat/menu/update'
                     data = this.menu
+                    console.log("update menu", data)
                     this.$jsonHttp.post(url, data).then((response) => {
                         console.log(url, response)
                         if (response.status != 200) {
@@ -572,6 +540,15 @@
             inputName(e) {
 
             },
+
+            getActiveMenuButton() {
+                if (this.activeMenuType() == 1) {
+                    return this.menu.button[this.activeMenuIndex]
+                } else if (this.activeMenuType() == 2) {
+                    return this.menu.button[this.activeMenuIndex].sub_button[this.activeMenuItemIndex]
+                }
+                return null
+            }
         },
         computed: {
             // 计算属性的 getter
@@ -581,6 +558,54 @@
                 }
                 return false;
             },
+            'menuName': {
+                get() {
+                    var btn = this.getActiveMenuButton()
+                    if (btn != null) {
+                        return btn.name
+                    } else {
+                        return ''
+                    }
+                },
+                set(value) {
+                    var btn = this.getActiveMenuButton()
+                    if (btn != null) {
+                        btn.name = value
+                    }
+                }
+            },
+            'menuContentType': {
+                get() {
+                    var btn = this.getActiveMenuButton()
+                    if (btn != null) {
+                        return btn.type
+                    } else {
+                        return ''
+                    }
+                },
+                set(value) {
+                    var btn = this.getActiveMenuButton()
+                    if (btn != null) {
+                        btn.type = value
+                    }
+                }              
+            },
+            'menuURL': {
+                get() {
+                    var btn = this.getActiveMenuButton()
+                    if (btn != null) {
+                        return btn.url
+                    } else {
+                        return ''
+                    }
+                },
+                set(value) {
+                    var btn = this.getActiveMenuButton()
+                    if (btn != null) {
+                        btn.url = value
+                    }
+                }
+            }
         },   
         mounted() {
             //服务器上拖取菜单数据
@@ -820,40 +845,54 @@
 
     .editor-inner {
         min-height: 580px;
+        //左右离自己border空20px
         padding: 0 20px 5px;
+        //灰色底色
         background-color: #f4f5f9;
         border: 1px solid #e7e7eb;
 
+        //头部
         .menu-title-bar {
-            padding: 9px 0;
+            //只显示下边框，作分割线，与后面的内容分开
             border-bottom: 1px solid #e7e7eb;
-            overflow: hidden;
 
+            padding: 9px 0;
+
+            //去掉子块级元素inline-block的间隙
+            font-size: 0px;
+
+            //左边一半，默认左对齐
             .title {
-                float: left;
+                //一行显示
+                display: inline-block;
+                width: 50%;
+                font-size: 14px;
+                //字体粗细
                 font-weight: 400;
             }
 
+            //右边一半，右对齐
             .delete {
+                //一行显示
+                display: inline-block;
+                width: 50%;
                 text-align: right;
+                font-size: 14px;
                 a {
+                    //链接颜色
                     color: #459ae9;
+                    //去掉链接文字下划线
                     text-decoration: none;
                 }
             }
         }
 
-        .menu-form-box {
-            .msg-sender-tips {
-                padding-top: 10px;
-            }
-        }
-
-        //表单
+        //表单(菜单名称text input+菜单内容radio)
         .form-group {
+            //与头部分隔点距离
+            margin-top: 30px;            
+            //与下面的白底编辑器分隔点距离
             margin-bottom: 10px;
-            margin-top: 30px;
-            padding-bottom: 0;
         }
 
         .form-item {
@@ -874,6 +913,7 @@
         .msg-content-container {
 
             .msg-content {
+                //白底边框
                 background-color: #fff;
                 border: 1px solid #e7e7eb;
 
