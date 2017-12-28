@@ -92,34 +92,32 @@
                         <!--发送消息-->
                         <div class="msg-content" v-show="menuContentType=='click'">
                             <div class="content">
-                                <div class="nav-box" style="height: 40px; border-bottom: 1px solid #e7e7eb">
-                                    <div style="width: 420px;">
-                                        <ul class="tabs"
-                                            style="line-height: 38px; height: 38px; text-align: center; font-size: 14px;">
-                                            <li class="item" :class="[{selected:showMenuContentMsgType===1}]"
-                                                @click="msgContentTabNav(1)">
-                                                <i class="tabs-icon news"></i>
-                                                图文消息
-                                            </li>
-                                            <li class="item" :class="[{selected:showMenuContentMsgType===2}]"
-                                                @click="msgContentTabNav(2)">
-                                                <i class="tabs-icon image"></i>
-                                                图片
-                                            </li>
-                                            <li class="item" :class="[{selected:showMenuContentMsgType===3}]"
-                                                @click="msgContentTabNav(3)">
-                                                <i class="tabs-icon audio"></i>
-                                                语音
-                                            </li>
-                                            <li class="item" :class="[{selected:showMenuContentMsgType===4}]"
-                                                @click="msgContentTabNav(4)">
-                                                <i class="tabs-icon video"></i>
-                                                视频
-                                            </li>
-                                        </ul>
-                                    </div>
+                                <!-- 内容选项tab -->
+                                <div class="nav-box">
+                                    <ul class="tabs">
+                                        <li class="item" :class="[{selected:showMenuContentMsgType===1}]"
+                                            @click="showMenuContentMsgType = 1">
+                                            <i class="tabs-icon news"></i>
+                                            图文消息
+                                        </li>
+                                        <li class="item" :class="[{selected:showMenuContentMsgType===2}]"
+                                            @click="showMenuContentMsgType = 2">
+                                            <i class="tabs-icon image"></i>
+                                            图片
+                                        </li>
+                                        <li class="item" :class="[{selected:showMenuContentMsgType===3}]"
+                                            @click="showMenuContentMsgType = 3">
+                                            <i class="tabs-icon audio"></i>
+                                            语音
+                                        </li>
+                                        <li class="item" :class="[{selected:showMenuContentMsgType===4}]"
+                                            @click="showMenuContentMsgType = 4">
+                                            <i class="tabs-icon video"></i>
+                                            视频
+                                        </li>
+                                    </ul>
                                 </div>
-                                <!--tabs div-->
+                                <!--tabs 具体内容-->
                                 <div class="tab-panel">
                                     <!--图文-->
                                     <div class="inner" v-show="showMenuContentMsgType===1">
@@ -895,21 +893,6 @@
             margin-bottom: 10px;
         }
 
-        .form-item {
-            vertical-align: top;
-            zoom: 1;
-
-            .form-item-label {
-                vertical-align: middle;
-                float: left;
-                font-size: 12px;
-                color: #495060;
-                line-height: 1;
-                padding: 10px 12px 10px 0;
-                box-sizing: border-box;
-            }
-        }
-
         .msg-content-container {
 
             .msg-content {
@@ -919,6 +902,11 @@
 
                 .content {
                     height: auto;
+
+                    .nav-box {
+                        height: 40px; 
+                        border-bottom: 1px solid #e7e7eb;
+                    }
 
                     .tab-panel {
                         background-color: #fff;
@@ -935,19 +923,24 @@
                                 width: 100%;
                                 height: 100%;
                                 justify-content: space-around;
+                                //上下对齐
                                 align-items: center;
 
                                 .item {
+                                    //浅色波点边框
                                     border: 2px dotted #dedede;
                                     width: 40%;
                                     height: 130px;
-                                    text-align: center;
+
+                                    //上下左右居中
                                     display: flex;
+                                    //图标和文字上下排列
                                     flex-direction: column;
                                     align-items: center;
                                     justify-content: center;
                                     cursor: pointer;
 
+                                    //大图标
                                     .icon {
                                         font-size: 45px;
                                         color: #c3c3c3;
@@ -976,6 +969,7 @@
                                         }
                                     }
                                 }
+                                //移动上去的时候有边框
                                 .item:hover {
                                     border: 2px dotted #a9a9a9;
                                 }
@@ -1017,56 +1011,64 @@
     }
 }
 
+//tab条容器
 .tabs {
-    .tabs-icon {
-        background: url(https://res.wx.qq.com/mpres/zh_CN/htmledition/comm_htmledition/style/widget/msg_tab_z25df2d.png);
-        margin-right: 3px;
-        margin-top: -2px;
-        width: 20px;
-        height: 20px;
-        vertical-align: middle;
-        display: inline-block;
-    }
+    width: 430px; 
+    line-height: 38px; 
+    height: 38px; 
+    text-align: center; 
+    font-size: 14px;
+    //border: 1px solid green;
+
     .item {
-        float: none;
+        //tab item横排
         display: inline-block;
-        vertical-align: top;
-        width: 102px;
+        border: 1px solid green;
+        width: 85px;
         cursor: pointer;
 
-        .news {
+
+        .tabs-icon {
+            //图标大小
+            width: 20px; height: 20px;
+            //包含多个小图片的背景图sprite，通过background-postion来定位背景图上的不同图标
+            background: url(https://res.wx.qq.com/mpres/zh_CN/htmledition/comm_htmledition/style/widget/msg_tab_z25df2d.png);
             background-repeat: no-repeat;
+
+            //图标上下对齐
+            vertical-align: middle;
+            //啥意思？？？
+            display: inline-block;
+        }
+
+        .news {
+            //意思是背景图左上角放在item的0, -240的位置，20px大小的框内就显示出了需要的背景图
             background-position: 0px -240px;
         }
         .image {
-            background-repeat: no-repeat;
             background-position: 0px -60px;
         }
         .audio {
             background-position: 0 -180px;
-            background-repeat: no-repeat;
         }
         .video {
             background-position: 0 -120px;
-            background-repeat: no-repeat;
         }
     }
+
+    //tab项选中css效果：通过位置定位切换背景图
     .selected {
         .news {
-            background-repeat: no-repeat;
             background-position: 0px -270px;
         }
         .image {
-            background-repeat: no-repeat;
             background-position: 0px -90px;
         }
         .audio {
             background-position: 0 -210px;
-            background-repeat: no-repeat;
         }
         .video {
             background-position: 0 -150px;
-            background-repeat: no-repeat;
         }
         color: #222;
     }
